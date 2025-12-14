@@ -3,6 +3,21 @@ import { CheckResult } from '../types/dependency-types';
 import { getVersionUpdateType } from '../utils/version-utils';
 
 /**
+ * セルにボーダーを追加
+ */
+function addBordersToRow(worksheet: ExcelJS.Worksheet, rowNumber: number, columnCount: number): void {
+  for (let col = 1; col <= columnCount; col++) {
+    const cell = worksheet.getCell(rowNumber, col);
+    cell.border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' }
+    };
+  }
+}
+
+/**
  * リポジトリ用のシートを作成
  */
 function createRepositorySheet(workbook: ExcelJS.Workbook, result: CheckResult): void {
@@ -17,17 +32,18 @@ function createRepositorySheet(workbook: ExcelJS.Workbook, result: CheckResult):
   worksheet.columns = [
     { header: 'パッケージ名', key: 'package', width: 30 },
     { header: '現在のバージョン', key: 'current', width: 20 },
-    { header: '最新バージョン', key: 'latest', width: 20 },
-    { header: 'Flutterバージョン', key: 'flutter', width: 25 }
+    { header: '最新バージョン', key: 'latest', width: 20 }
   ];
   
   // ヘッダーのスタイル設定
-  worksheet.getRow(1).font = { bold: true };
-  worksheet.getRow(1).fill = {
+  const headerRow = worksheet.getRow(1);
+  headerRow.font = { bold: true };
+  headerRow.fill = {
     type: 'pattern',
     pattern: 'solid',
     fgColor: { argb: 'FFE0E0E0' }
   };
+  addBordersToRow(worksheet, 1, 3);
   
   let rowNumber = 2;
   
@@ -35,10 +51,11 @@ function createRepositorySheet(workbook: ExcelJS.Workbook, result: CheckResult):
     worksheet.addRow({
       package: 'エラー',
       current: result.error,
-      latest: '',
-      flutter: ''
+      latest: ''
     });
-    worksheet.getRow(rowNumber).font = { color: { argb: 'FFFF0000' } };
+    const errorRow = worksheet.getRow(rowNumber);
+    errorRow.font = { color: { argb: 'FFFF0000' } };
+    addBordersToRow(worksheet, rowNumber, 3);
     return;
   }
   
@@ -46,16 +63,15 @@ function createRepositorySheet(workbook: ExcelJS.Workbook, result: CheckResult):
   worksheet.addRow({
     package: 'Flutter SDK',
     current: result.flutter.current,
-    latest: result.flutter.latest,
-    flutter: result.flutter.updateAvailable 
-      ? `${result.flutter.current} → ${result.flutter.latest}`
-      : result.flutter.current
+    latest: result.flutter.latest
   });
   
   // 更新可能な場合はオレンジ色、最新の場合は通常の色
+  const flutterRow = worksheet.getRow(rowNumber);
   if (result.flutter.updateAvailable) {
-    worksheet.getRow(rowNumber).font = { color: { argb: 'FFFF6600' } };
+    flutterRow.font = { color: { argb: 'FFFF6600' } };
   }
+  addBordersToRow(worksheet, rowNumber, 3);
   rowNumber++;
   
   // パッケージ情報
@@ -63,14 +79,14 @@ function createRepositorySheet(workbook: ExcelJS.Workbook, result: CheckResult):
     worksheet.addRow({
       package: pkg.name,
       current: pkg.current,
-      latest: pkg.latest,
-      flutter: ''
+      latest: pkg.latest
     });
+    
+    const row = worksheet.getRow(rowNumber);
     
     // 更新可能な場合のみ色分け
     if (pkg.updateAvailable) {
       const updateType = getVersionUpdateType(pkg.current, pkg.latest);
-      const row = worksheet.getRow(rowNumber);
       
       if (updateType === 'major') {
         // メジャーバージョンアップ: 赤色
@@ -83,6 +99,8 @@ function createRepositorySheet(workbook: ExcelJS.Workbook, result: CheckResult):
         row.font = { color: { argb: 'FF0066CC' } };
       }
     }
+    
+    addBordersToRow(worksheet, rowNumber, 3);
     rowNumber++;
   }
 }
@@ -105,12 +123,14 @@ function createSummarySheet(workbook: ExcelJS.Workbook, results: CheckResult[]):
   ];
   
   // ヘッダーのスタイル設定
-  worksheet.getRow(1).font = { bold: true };
-  worksheet.getRow(1).fill = {
+  const headerRow = worksheet.getRow(1);
+  headerRow.font = { bold: true };
+  headerRow.fill = {
     type: 'pattern',
     pattern: 'solid',
     fgColor: { argb: 'FFE0E0E0' }
   };
+  addBordersToRow(worksheet, 1, 7);
   
   let rowNumber = 2;
   
@@ -125,7 +145,9 @@ function createSummarySheet(workbook: ExcelJS.Workbook, results: CheckResult[]):
         totalCount: '',
         status: 'エラー'
       });
-      worksheet.getRow(rowNumber).font = { color: { argb: 'FFFF0000' } };
+      const errorRow = worksheet.getRow(rowNumber);
+      errorRow.font = { color: { argb: 'FFFF0000' } };
+      addBordersToRow(worksheet, rowNumber, 7);
       rowNumber++;
       continue;
     }
@@ -172,6 +194,7 @@ function createSummarySheet(workbook: ExcelJS.Workbook, results: CheckResult[]):
       row.getCell(4).font = { color: { argb: 'FF9C5700' }, bold: true };
     }
     
+    addBordersToRow(worksheet, rowNumber, 7);
     rowNumber++;
   }
 }
