@@ -236,6 +236,8 @@ async function checkRepository(
       packages
     };
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`❌ Failed to check ${repository.name}: ${errorMessage}`);
     return {
       repository,
       flutter: {
@@ -244,7 +246,7 @@ async function checkRepository(
         updateAvailable: false
       },
       packages: [],
-      error: error instanceof Error ? error.message : String(error)
+      error: errorMessage
     };
   }
 }
@@ -294,7 +296,17 @@ async function sendSlackNotification(
   
   // 更新があるリポジトリの詳細
   for (const result of results) {
-    if (result.error) continue;
+    if (result.error) {
+      // 失敗したリポジトリの情報を表示
+      blocks.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*❌ ${result.repository.name}*\nエラー: ${result.error}`
+        }
+      });
+      continue;
+    }
     
     const outdatedPackages = result.packages.filter(p => p.updateAvailable);
     const hasFlutterUpdate = result.flutter.updateAvailable;
@@ -331,6 +343,7 @@ async function sendSlackNotification(
   
   await slack.chat.postMessage({
     channel,
+    text: hasUpdates ? 'Flutter依存関係更新通知' : 'Flutter依存関係チェック結果',
     blocks,
     username: 'Flutter Version Bot',
     icon_emoji: ':flutter:'
