@@ -611,19 +611,68 @@ async function sendSlackNotification(
         id: fileId,
         title: 'Flutter依存関係チェック結果'
       }],
-      channel_id: channel,
-      initial_comment: '📊 詳細なチェック結果をExcelファイルで添付しました。'
+      channel_id: channel
     };
-    
-    // メッセージのタイムスタンプが存在する場合はスレッドに添付
-    if (messageResponse.ts) {
-      completeUploadOptions.thread_ts = messageResponse.ts;
-    }
     
     const completeUploadResponse = await slack.files.completeUploadExternal(completeUploadOptions);
     
-    if (!completeUploadResponse.ok) {
+    if (!completeUploadResponse.ok || !completeUploadResponse.files || completeUploadResponse.files.length === 0) {
       throw new Error(completeUploadResponse.error || 'Failed to complete upload');
+    }
+    
+    const uploadedFile = completeUploadResponse.files[0];
+    
+    // Step 4: スレッドにファイル情報を投稿
+    if (messageResponse.ts) {
+      await slack.chat.postMessage({
+        channel: channel,
+        thread_ts: messageResponse.ts,
+        text: '📊 詳細なチェック結果をExcelファイルで添付しました。',
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: '📊 詳細なチェック結果をExcelファイルで添付しました。'
+            },
+            accessory: uploadedFile.permalink 
+              ? {
+                  type: 'button',
+                  text: {
+                    type: 'plain_text',
+                    text: 'ファイルを表示'
+                  },
+                  url: uploadedFile.permalink
+                }
+              : undefined
+          }
+        ]
+      });
+    } else {
+      // スレッドがない場合は、ファイルのコメントとして投稿
+      await slack.chat.postMessage({
+        channel: channel,
+        text: '📊 詳細なチェック結果をExcelファイルで添付しました。',
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: '📊 詳細なチェック結果をExcelファイルで添付しました。'
+            },
+            accessory: uploadedFile.permalink
+              ? {
+                  type: 'button',
+                  text: {
+                    type: 'plain_text',
+                    text: 'ファイルを表示'
+                  },
+                  url: uploadedFile.permalink
+                }
+              : undefined
+          }
+        ]
+      });
     }
     
     console.log('✅ Excel file uploaded to Slack thread');
