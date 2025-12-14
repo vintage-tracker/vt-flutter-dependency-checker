@@ -575,44 +575,55 @@ async function sendSlackNotification(
     icon_emoji: ':flutter:'
   });
   
-  // Excelファイルを生成してスレッドに添付
+  // Excelファイルを生成してスレッドに添付（新しいアップロード方法）
   try {
     console.log('📊 Generating Excel file...');
     const excelBuffer = await generateExcelFile(results);
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
     const filename = `flutter-dependency-check-${timestamp}.xlsx`;
     
-    // FormDataを使って直接Slack APIにアップロード
-    const FormData = require('form-data');
-    const form = new FormData();
-    form.append('file', excelBuffer, {
+    // Step 1: アップロードURLを取得
+    const getUploadURLResponse = await slack.files.getUploadURLExternal({
       filename: filename,
-      contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      length: excelBuffer.length
     });
-    form.append('channels', channel);
-    form.append('title', 'Flutter依存関係チェック結果');
-    form.append('initial_comment', '📊 詳細なチェック結果をExcelファイルで添付しました。');
+    
+    if (!getUploadURLResponse.ok || !getUploadURLResponse.upload_url || !getUploadURLResponse.file_id) {
+      throw new Error(getUploadURLResponse.error || 'Failed to get upload URL');
+    }
+    
+    const uploadUrl = getUploadURLResponse.upload_url;
+    const fileId = getUploadURLResponse.file_id;
+    
+    // Step 2: ファイルをアップロード
+    await axios.put(uploadUrl, excelBuffer, {
+      headers: {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Length': excelBuffer.length.toString()
+      },
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity
+    });
+    
+    // Step 3: アップロード完了を通知
+    const completeUploadOptions: any = {
+      files: [{
+        id: fileId,
+        title: 'Flutter依存関係チェック結果'
+      }],
+      channel_id: channel,
+      initial_comment: '📊 詳細なチェック結果をExcelファイルで添付しました。'
+    };
     
     // メッセージのタイムスタンプが存在する場合はスレッドに添付
     if (messageResponse.ts) {
-      form.append('thread_ts', messageResponse.ts);
+      completeUploadOptions.thread_ts = messageResponse.ts;
     }
     
-    const uploadResponse = await axios.post(
-      'https://slack.com/api/files.upload',
-      form,
-      {
-        headers: {
-          ...form.getHeaders(),
-          'Authorization': `Bearer ${slackToken}`
-        },
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity
-      }
-    );
+    const completeUploadResponse = await slack.files.completeUploadExternal(completeUploadOptions);
     
-    if (!uploadResponse.data.ok) {
-      throw new Error(uploadResponse.data.error || 'Failed to upload file');
+    if (!completeUploadResponse.ok) {
+      throw new Error(completeUploadResponse.error || 'Failed to complete upload');
     }
     
     console.log('✅ Excel file uploaded to Slack thread');
