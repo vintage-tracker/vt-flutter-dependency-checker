@@ -71,6 +71,3 @@ temp/
 # Test files
 test-*.ts
 check-*.ts
-
-# Repository configuration
-repositories.json
