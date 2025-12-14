@@ -5,18 +5,36 @@ import * as yaml from 'yaml';
  */
 export function getFlutterVersionFromFvmrc(fvmrcContent: string): string | null {
   try {
-    const lines = fvmrcContent.split('\n');
+    const trimmed = fvmrcContent.trim();
+    
+    // JSON形式の.fvmrcをサポート: {"flutter": "3.32.8"}
+    if (trimmed.startsWith('{')) {
+      try {
+        const json = JSON.parse(trimmed);
+        if (json.flutter && typeof json.flutter === 'string') {
+          const versionMatch = json.flutter.match(/(\d+\.\d+\.\d+)/);
+          if (versionMatch) {
+            return versionMatch[1];
+          }
+        }
+      } catch (jsonError) {
+        // JSON解析に失敗した場合は次の方法を試す
+      }
+    }
+    
+    // YAML形式の.fvmrcをサポート: flutter: "3.24.0" または flutter: 3.24.0
+    const lines = trimmed.split('\n');
     for (const line of lines) {
-      const trimmed = line.trim();
-      // flutter: "3.24.0" または flutter: 3.24.0 の形式をサポート
-      if (trimmed.startsWith('flutter:')) {
-        const flutterValue = trimmed.replace('flutter:', '').trim().replace(/['"]/g, '');
+      const lineTrimmed = line.trim();
+      if (lineTrimmed.startsWith('flutter:')) {
+        const flutterValue = lineTrimmed.replace('flutter:', '').trim().replace(/['"]/g, '');
         const versionMatch = flutterValue.match(/(\d+\.\d+\.\d+)/);
         if (versionMatch) {
           return versionMatch[1];
         }
       }
     }
+    
     return null;
   } catch {
     return null;
