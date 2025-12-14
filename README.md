@@ -126,5 +126,3 @@ Botをチャンネルに招待：
 ## ライセンス
 
 MIT
-# flutter-version-notification-bot
-# flutter-version-notification-bot

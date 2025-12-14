@@ -1,5 +1,5 @@
 {
-  "name": "flutter-version-notification",
+  "name": "flutter-dependency-checker",
   "version": "1.0.0",
   "description": "GitHub ActionsでFlutterバージョンとパッケージをチェックしてSlackに通知",
   "main": "dist/check.js",
