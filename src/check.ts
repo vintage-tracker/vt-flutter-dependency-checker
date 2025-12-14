@@ -351,7 +351,7 @@ async function main() {
   
   const config: Config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
   const slackToken = process.env.SLACK_BOT_TOKEN;
-  const githubToken = process.env.GITHUB_TOKEN;
+  const githubToken = process.env.GH_TOKEN;
   
   if (!slackToken) {
     console.error('Error: SLACK_BOT_TOKEN environment variable is required');

@@ -61,13 +61,13 @@ cp .env.example .env
 
 ```bash
 export SLACK_BOT_TOKEN=xoxb-your-token
-export GITHUB_TOKEN=ghp_your-token  # オプション
+export GH_TOKEN=ghp_your-token  # オプション
 ```
 
 **必要な環境変数：**
 - `SLACK_BOT_TOKEN`: Slack Bot Token（必須）
 - `SLACK_CHANNEL`: Slack通知チャンネルID（必須、例: `C0123456789A`）
-- `GITHUB_TOKEN`: GitHub Token（オプション、プライベートリポジトリなどにアクセスするための）
+- `GH_TOKEN`: GitHub Token（オプション、プライベートリポジトリなどにアクセスするための）
 
 **注意**: チャンネルIDは機密情報のため、環境変数で管理してください。`repositories.json`には含めないでください。
 
@@ -87,7 +87,7 @@ GitHubリポジトリのSettings > Secrets and variables > Actionsで以下を�
 
 - `SLACK_BOT_TOKEN`: Slack Bot Token（必須）
 - `SLACK_CHANNEL`: Slack通知チャンネルID（必須、例: `C0123456789A`）
-- `GITHUB_TOKEN`: GitHub Token（オプション、プライベートリポジトリなどにアクセスするための）
+- `GH_TOKEN`: GitHub Token（オプション、プライベートリポジトリなどにアクセスするための）
 
 ### 2. ワークフローの実行
 
