@@ -16,7 +16,6 @@ interface Repository {
 interface Config {
   repositories: Repository[];
   settings: {
-    defaultNotifyChannel: string;
     includeDevDeps?: boolean;
   };
 }
@@ -371,7 +370,13 @@ async function main() {
   }
   
   console.log('📤 Sending notification to Slack...');
-  await sendSlackNotification(config.settings.defaultNotifyChannel, results, slackToken);
+  // チャンネルIDは環境変数で指定（必須）
+  const channel = process.env.SLACK_CHANNEL;
+  if (!channel) {
+    console.error('Error: SLACK_CHANNEL environment variable is required');
+    process.exit(1);
+  }
+  await sendSlackNotification(channel, results, slackToken);
   console.log('✅ Done!');
 }
 

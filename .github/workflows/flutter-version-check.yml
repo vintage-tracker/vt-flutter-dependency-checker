@@ -28,6 +28,7 @@ jobs:
       - name: Check Flutter versions and packages
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node dist/check.js
 

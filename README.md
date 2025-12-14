@@ -43,7 +43,6 @@ cp repositories.json.sample repositories.json
     }
   ],
   "settings": {
-    "defaultNotifyChannel": "C0984UGV52Q",
     "includeDevDeps": true
   }
 }
@@ -67,7 +66,10 @@ export GITHUB_TOKEN=ghp_your-token  # オプション
 
 **必要な環境変数：**
 - `SLACK_BOT_TOKEN`: Slack Bot Token（必須）
-- `GITHUB_TOKEN`: GitHub Token（オプション、API制限回避用）
+- `SLACK_CHANNEL`: Slack通知チャンネルID（必須、例: `C0123456789A`）
+- `GITHUB_TOKEN`: GitHub Token（オプション、プライベートリポジトリなどにアクセスするための）
+
+**注意**: チャンネルIDは機密情報のため、環境変数で管理してください。`repositories.json`には含めないでください。
 
 **注意**: 現在のコードは`.env`ファイルを自動的に読み込みません。`dotenv`パッケージを使用する場合は、`npm install dotenv`でインストールし、`check.ts`の先頭に`import 'dotenv/config'`を追加してください。
 
@@ -83,8 +85,9 @@ npm run check
 
 GitHubリポジトリのSettings > Secrets and variables > Actionsで以下を設定：
 
-- `SLACK_BOT_TOKEN`: Slack Bot Token
-- `GITHUB_TOKEN`: GitHub Token（オプション）
+- `SLACK_BOT_TOKEN`: Slack Bot Token（必須）
+- `SLACK_CHANNEL`: Slack通知チャンネルID（必須、例: `C0123456789A`）
+- `GITHUB_TOKEN`: GitHub Token（オプション、プライベートリポジトリなどにアクセスするための）
 
 ### 2. ワークフローの実行
 

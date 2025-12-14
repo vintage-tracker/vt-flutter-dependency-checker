@@ -38,7 +38,7 @@ SECURITY_SCAN=$(jq -r '.settings.securityScan // true' repositories.json)
 
 # Convert channel name to ID if needed (keep existing ID format for backward compatibility)
 if [ "$NOTIFY_CHANNEL" = "#notification-from-locotele-bot" ]; then
-  NOTIFY_CHANNEL="C0984UGV52Q"
+  NOTIFY_CHANNEL="C0123456789A"
 fi
 
 cat > "$REQUEST_FILE" << EOF

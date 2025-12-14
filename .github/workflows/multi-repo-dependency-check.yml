@@ -93,7 +93,7 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.PRIVATE_REPO_TOKEN || github.token }}
-          DEFAULT_SLACK_CHANNEL: ${{ vars.DEFAULT_SLACK_CHANNEL || 'C0984UGV52Q' }}
+          DEFAULT_SLACK_CHANNEL: ${{ vars.DEFAULT_SLACK_CHANNEL || 'C0123456789A' }}
           PUB_DEV_API_TIMEOUT: ${{ vars.PUB_DEV_API_TIMEOUT || '30000' }}
           GITHUB_API_TIMEOUT: ${{ vars.API_TIMEOUT_GITHUB || '30000' }}
         run: |
