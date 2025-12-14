@@ -1,0 +1,17 @@
+{
+  "repositories": [
+    {
+      "name": "vt_app",
+      "description": "VintageTrackerモバイルアプリのリポジトリ",
+      "url": "https://github.com/vintage-tracker/vt_app"
+    },
+    {
+      "name": "vt_admin_dashboard",
+      "description": "VintageTracker管理画面のリポジトリ",
+      "url": "https://github.com/vintage-tracker/vt-admin-dashboard"
+    }
+  ],
+  "settings": {
+    "includeDevDeps": true
+  }
+}
