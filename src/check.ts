@@ -168,6 +168,9 @@ async function getLatestPackageVersion(packageName: string): Promise<string> {
       `https://pub.dev/api/packages/${packageName}`,
       { timeout: 10000 }
     );
+    if (!response.data?.latest?.version) {
+      throw new Error(`No version information found for ${packageName}`);
+    }
     return response.data.latest.version;
   } catch (error) {
     throw new Error(`Failed to get latest version for ${packageName}: ${error}`);
@@ -226,7 +229,15 @@ async function checkRepository(
           updateAvailable: isUpdateAvailable(dep.version, latest)
         });
       } catch (error) {
-        console.warn(`Failed to check ${dep.name}: ${error}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error(`❌ Failed to check package ${dep.name} (current: ${dep.version}): ${errorMessage}`);
+        // エラーが発生したパッケージも結果に含める（エラー情報付き）
+        packages.push({
+          name: dep.name,
+          current: dep.version,
+          latest: 'N/A',
+          updateAvailable: false
+        });
       }
     }
     
